@@ -1,4 +1,4 @@
-package com.example.medi
+package com.example.medi.view
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column

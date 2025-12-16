@@ -5,4 +5,7 @@
     <string name="title_activity_register_screen">RegisterScreen</string>
     <string name="title_activity_main">MainActivity</string>
     <string name="title_activity_dashboard">Dashboard</string>
+    <string name="title_activity_forget_password_screen">ForgetPasswordScreen</string>
+    <string name="title_activity_add_meds_screen">addMedsScreen</string>
+    <string name="title_activity_landin_page_screen">LandinPageScreen</string>
 </resources>

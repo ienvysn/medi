@@ -2,27 +2,22 @@ package com.example.medi.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val Purple80 = Color(0xFFD0BCFF)
-val PurpleGrey80 = Color(0xFFCCC2DC)
-val Pink80 = Color(0xFFEFB8C8)
-
-val Purple40 = Color(0xFF6650a4)
-val PurpleGrey40 = Color(0xFF625b71)
-val Pink40 = Color(0xFF7D5260)
 val black= Color(0xFF000000)
 val InputBackground = Color(0xFFF0F0F0)
 
-val Primary = Color(0xFF20B3A9)
-val Secondary = Color(0xFFD9F3F1)
-val Accent = Color(0xFFF9A825)
-
 // Background & Surfaces
-val Background = Color(0xFFE9F7F4)
-val Card = Color(0xFFFFFFFF)
+val Background = Color(0xFFF5F9F9)
+val AppoinementBackground = Color(0xFFF0F9F8)
+val Card = Color(0xFF3AADA2)
+val BorderOutline = Color(0xFFDAE7E7)
+val TextColor = Color(0xFF628484)
+val DarkTextColor = Color(0xFF32675F)
 
 // Text / Foreground
 val IconInacive = Color(0xFF6C7F7F)
 val IconActive = Color(0xFF13907E)
+val ChipBackground = Color(0xFFDBF0EE)
+val AquaIcon = Color(0xFFCAE8E6)
 
 // Status Colors
 val Success = Color(0xFF23C469)

@@ -1,5 +1,4 @@
-package com.example.medi
-
+package com.example.medi.view
 
 
 import androidx.compose.foundation.background
@@ -10,10 +9,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 @Composable
-fun MedsScreen(){
+fun AppointmentScreen(){
     Column(
-        modifier = Modifier.fillMaxSize().background(Color.Green)
+        modifier = Modifier.fillMaxSize().background(Color.Yellow)
     ) {
-        Text("Meds screen")
+        Text("Appoinment screen")
     }
 }

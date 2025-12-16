@@ -1,7 +1,8 @@
-package com.example.medi
+package com.example.medi.view
 
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -9,15 +10,14 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -42,40 +42,40 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.medi.R
+import com.example.medi.repository.userRepoImpl
 import com.example.medi.ui.theme.InputBackground
 import com.example.medi.ui.theme.black
+import com.example.medi.viewModel.UserViewModel
 
 
-
-class RegisterScreen : ComponentActivity() {
+class LoginScreen : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            RegisterBody()
+            LoginBody()
+            }
         }
     }
-}
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun RegisterBody() {
+fun LoginBody() {
     var password by remember {
         mutableStateOf("")
     }
@@ -84,15 +84,15 @@ fun RegisterBody() {
     }
     var checked by remember { mutableStateOf(false) }
     var email by remember { mutableStateOf("") }
-    var username by remember { mutableStateOf("") }
-
+    var userViewModel = remember {   UserViewModel(userRepoImpl())}
     val context = LocalContext.current
 
     Scaffold { padding ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding).background(Color(0xFFFFFFFF))
+                .padding(padding)
+                .background(Color(0xFFFFFFFF))
 
         ) {
 
@@ -126,60 +126,24 @@ fun RegisterBody() {
                 ) {
 
                     item {
-                        Text("Register", style = TextStyle(fontWeight = FontWeight.Bold, fontSize = 30.sp), modifier = Modifier.padding(vertical = 10.dp))
+                        Text("Login", style = TextStyle(fontWeight = FontWeight.Bold, fontSize = 30.sp), modifier = Modifier.padding(vertical = 10.dp))
                         Text(
                             buildAnnotatedString {
                                 withStyle(style = SpanStyle(color = Color.Gray, fontSize = 16.sp)) {
-                                    append("Already have an Account? ")
+                                    append("Don't have an Account? ")
                                 }
                                 withStyle(style = SpanStyle(fontWeight = FontWeight.Bold, fontSize = 16.sp)) {
-                                    append("Login")
+                                    append("Sign Up")
                                 }
                             }
-                        ,
+                            ,
                             modifier = Modifier.clickable {
-                                context.startActivity(Intent(context, LoginScreen::class.java))
+                                context.startActivity(Intent(context, RegisterScreen::class.java))
                             }
                         )
-
 
                         Spacer(modifier = Modifier.height(20.dp));
 
-                        OutlinedTextField(
-                            value = username,
-                            onValueChange = { username = it },
-                            leadingIcon = {
-                                Icon(
-                                    painterResource(R.drawable.baseline_person_24),
-                                    contentDescription = "Email Icon"
-                                )
-                            },
-                            label = {
-                                Text(
-                                    "Enter Your Username",
-                                    style = TextStyle(color = Color.Black)
-                                )
-                            },
-
-                            shape = RoundedCornerShape(15.dp),
-                            keyboardOptions = KeyboardOptions(
-                                keyboardType = KeyboardType.Email,
-
-                                ),
-                            singleLine = true,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 15.dp),
-                            colors = TextFieldDefaults.colors(
-                                focusedContainerColor = InputBackground,
-                                unfocusedContainerColor = InputBackground,
-                                focusedIndicatorColor = Color.Gray,
-                                unfocusedIndicatorColor = Color.Transparent
-                            ),
-
-                        )
-
-                        Spacer(modifier = Modifier.height(12.dp))
 
                         OutlinedTextField(
                             value = email,
@@ -209,7 +173,7 @@ fun RegisterBody() {
                             )
                         )
 
-                        Spacer(modifier = Modifier.height(12.dp))
+                        Spacer(modifier = Modifier.padding(vertical = 10.dp))
 
 
                         OutlinedTextField(
@@ -253,11 +217,56 @@ fun RegisterBody() {
                             )
 
                         )
+                    }
 
+                    item {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 15.dp, vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+
+
+                            TextButton(onClick = {
+                                val intent = Intent(context, ForgetPasswordScreen::class.java)
+                            },modifier = Modifier.weight(2f)) {
+                                Text("Forgot Password?", style = TextStyle(fontSize = 16.sp, color = black))
+                            }
+                        }
+                    }
+
+                    item {
                         Spacer(modifier = Modifier.height(25.dp))
 
                         Button(
-                            onClick = {  },
+                            onClick = {
+
+                                if (email.isEmpty() || !email.contains("@")) {
+                                    Toast.makeText(context, "Please enter a valid email", Toast.LENGTH_SHORT).show()
+                                    return@Button
+                                }
+
+                                if (password.isEmpty()) {
+                                    Toast.makeText(context, "Please enter a password", Toast.LENGTH_SHORT).show()
+                                    return@Button
+                                }
+                                userViewModel.login(email,password) { success, message ->
+                                    if (success) {
+                                        Toast.makeText(context, "Logged In", Toast.LENGTH_SHORT).show()
+                                        context.startActivity(
+                                            Intent(
+                                                context,
+                                                Dashboard::class.java
+                                            )
+                                        )
+                                    }else{
+                                        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                                    }
+
+
+                                }
+                            },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(50.dp),
@@ -266,9 +275,11 @@ fun RegisterBody() {
                                 containerColor = Color(0xFF009688),
                             )
                         ) {
-                            Text(text = "Register", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                            Text(text = "Login", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
                         }
+                    }
 
+                    item {
                         Spacer(modifier = Modifier.height(25.dp))
 
                         Row(
@@ -296,11 +307,15 @@ fun RegisterBody() {
                                 thickness = 1.dp
                             )
                         }
+                    }
 
+                    item {
                         Spacer(modifier = Modifier.height(25.dp))
 
                         OutlinedButton(
-                            onClick = { /*TODO*/ },
+                            onClick = {
+
+                            },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(50.dp),
@@ -311,7 +326,6 @@ fun RegisterBody() {
                                 painter = painterResource(id = R.drawable.googlelogo),
                                 contentDescription = "Google login",
                                 tint = Color.Unspecified
-
                             )
                         }
                     }
@@ -325,6 +339,7 @@ fun RegisterBody() {
 
 @Preview
 @Composable
-fun RegisterPreview(){
-    RegisterBody()
+fun LoginPreview(){
+    LoginBody()
 }
+

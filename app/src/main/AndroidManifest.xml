@@ -12,7 +12,40 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Medi">
         <activity
-            android:name=".Dashboard"
+            android:name=".view.LandinPageScreen"
+            android:exported="true"
+            android:label="@string/title_activity_landin_page_screen"
+            android:theme="@style/Theme.Medi">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".view.addMedsScreen"
+            android:exported="true"
+            android:label="@string/title_activity_add_meds_screen"
+            android:theme="@style/Theme.Medi">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".view.ForgetPasswordScreen"
+            android:exported="true"
+            android:label="@string/title_activity_forget_password_screen"
+            android:theme="@style/Theme.Medi">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".view.Dashboard"
             android:exported="true"
             android:label="@string/title_activity_dashboard"
             android:theme="@style/Theme.Medi">
@@ -34,12 +67,12 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".RegisterScreen"
+            android:name=".view.RegisterScreen"
             android:exported="false"
             android:label="@string/title_activity_register_screen"
             android:theme="@style/Theme.Medi" />
         <activity
-            android:name=".LoginScreen"
+            android:name=".view.LoginScreen"
             android:exported="true"
             android:label="@string/title_activity_login_screen"
             android:theme="@style/Theme.Medi">
