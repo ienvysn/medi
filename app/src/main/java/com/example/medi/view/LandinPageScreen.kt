@@ -1,5 +1,6 @@
 package com.example.medi.view
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -28,6 +29,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -52,6 +54,7 @@ class LandinPageScreen : ComponentActivity() {
 
 @Composable
 fun LandinPageScreenBody(){
+    val context = LocalContext.current
 
     Box(
         modifier = Modifier
@@ -72,13 +75,13 @@ fun LandinPageScreenBody(){
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
 
-                Image(
-                    painter = painterResource(id = R.drawable.profile),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .height(260.dp)
-                        .fillMaxWidth()
-                )
+//                Image(
+//                    painter = painterResource(id = R.drawable.medi),
+//                    contentDescription = null,
+//                    modifier = Modifier
+//                        .height(260.dp)
+//                        .fillMaxWidth()
+//                )
 
                 Spacer(modifier = Modifier.height(24.dp))
 
@@ -92,7 +95,7 @@ fun LandinPageScreenBody(){
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
-                    text = "Manage your medicines and appointments with ease.",
+                    text = "Your friendly companion for tracking medications and appointments. Your health journey starts here.",
                     fontSize = 14.sp,
                     color = Color.White.copy(alpha = 0.85f),
                     textAlign = TextAlign.Center
@@ -106,7 +109,10 @@ fun LandinPageScreenBody(){
 
 
                 Button(
-                    onClick = {  },
+                    onClick = {
+                        val intent= Intent(context, RegisterScreen::class.java)
+                        context.startActivity(intent)
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(52.dp),
@@ -125,7 +131,10 @@ fun LandinPageScreenBody(){
                 Spacer(modifier = Modifier.height(12.dp))
 
                 OutlinedButton(
-                    onClick ={},
+                    onClick ={
+                        val intent = Intent(context, LoginScreen::class.java)
+                        context.startActivity(intent)
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(52.dp),

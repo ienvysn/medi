@@ -20,16 +20,15 @@ class MedsViewModel (val repo: medsRepo): ViewModel(){
         repo.deleteMeds(id,callback)
     }
 
-    private val _allmeds = MutableLiveData<List<medsModel?>>()
-
-    val meds: MutableLiveData<List<medsModel?>>
-        get() = _allmeds
 
     private val _meds = MutableLiveData<medsModel?>()
 
-    val med: MutableLiveData<medsModel?>
+    val meds: MutableLiveData<medsModel?>
         get() = _meds
+    private val _allmeds = MutableLiveData<List<medsModel?>>()
 
+    val allmeds: MutableLiveData<List<medsModel?>>
+        get() = _allmeds
 
 
 

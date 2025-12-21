@@ -61,14 +61,14 @@ fun DashboardBody() {
 
         )
     Scaffold(
-        floatingActionButton = {
-            FloatingActionButton(onClick ={
-                val intent= Intent(context, addMedsScreen::class.java)
-                context.startActivity(intent)
-            }) {
-//                Icon(imageVector = Icons.Default.Add, contentDescription = "Add")
-            }
-        },
+//        floatingActionButton = {
+//            FloatingActionButton(onClick ={
+//                val intent= Intent(context, addMedsScreen::class.java)
+//                context.startActivity(intent)
+//            }) {
+////                Icon(imageVector = Icons.Default.Add, contentDescription = "Add")
+//            }
+//        },
         bottomBar = {
             NavigationBar(
                 modifier = Modifier.height(65.dp),

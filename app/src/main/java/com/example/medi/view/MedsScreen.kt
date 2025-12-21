@@ -26,6 +26,13 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+
+
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -35,13 +42,43 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.medi.R
+import com.example.medi.repository.medsRepoImpl
 import com.example.medi.ui.theme.Background
 import com.example.medi.ui.theme.IconActive
 import com.example.medi.ui.theme.TextColor
+import com.example.medi.viewModel.MedsViewModel
 
 
 @Composable
 fun MedsScreen() {
+    var medsName by remember { mutableStateOf("") }
+    var medsDose by remember { mutableStateOf("") }
+    var medsTime by remember { mutableStateOf("") }
+    var medsFrequency by remember { mutableStateOf("") }
+    var medsNote by remember { mutableStateOf("") }
+    var medsStatus by remember { mutableStateOf("") }
+    val medsViewModel = remember { MedsViewModel(medsRepoImpl()) }
+    val allmeds= medsViewModel.allmeds.observeAsState(inital=emptyList())
+
+    val meds= medsViewModel.meds.observeAsState()
+
+    LaunchedEffect(meds.value) {
+        medsViewModel.getAllmeds()
+        meds.value?.let {
+            medsName = it.name,
+            medsDose = it.dose,
+            medsTime = it.time,
+            medsFrequency = it.frequency,
+            medsNote = it.note,
+            medsStatus = it.status
+        }
+
+
+    }
+
+
+
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -97,6 +134,7 @@ Row {
         }
     }
 }
+
 
 @Composable
 fun MedicationCard(
