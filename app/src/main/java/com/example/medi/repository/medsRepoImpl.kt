@@ -79,7 +79,7 @@ class medsRepoImpl: medsRepo {
 
     }
 
-    override fun getAllmeds(callback: (Boolean, String, List<medsModel?>) -> Unit) {
+    override fun getAllmeds(callback: (Boolean, String, List<medsModel>) -> Unit) {
        ref.addValueEventListener(object: ValueEventListener {
            override fun onDataChange(snapshot: DataSnapshot) {
                if (snapshot.exists()) {

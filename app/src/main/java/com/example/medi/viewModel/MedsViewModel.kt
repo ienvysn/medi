@@ -1,5 +1,6 @@
 package com.example.medi.viewModel
 
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.medi.model.medsModel
@@ -25,11 +26,10 @@ class MedsViewModel (val repo: medsRepo): ViewModel(){
 
     val meds: MutableLiveData<medsModel?>
         get() = _meds
-    private val _allmeds = MutableLiveData<List<medsModel?>>()
+    private val _allmeds = MutableLiveData<List<medsModel>>()
 
-    val allmeds: MutableLiveData<List<medsModel?>>
+    val allmeds: LiveData<List<medsModel>>
         get() = _allmeds
-
 
 
     fun getMedsById(id: String){
@@ -44,14 +44,13 @@ class MedsViewModel (val repo: medsRepo): ViewModel(){
 
 
     }
-    fun getAllmeds(){
-        repo.getAllmeds(){
+    fun getAllmeds() {
+        repo.getAllmeds { success, message, data ->
+            if (success) {
 
-            success, message, data ->
-            if (success){
                 _allmeds.postValue(data)
-            }else{
-                _allmeds.postValue(data)
+            } else {
+                _allmeds.postValue(emptyList())
             }
         }
     }

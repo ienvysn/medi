@@ -7,6 +7,6 @@ interface medsRepo {
     fun updateMeds(id: String,medsModel: medsModel,callback: (Boolean, String) -> Unit)
     fun deleteMeds(id: String,callback: (Boolean, String) -> Unit)
     fun getMedsById(id: String,callback: (Boolean, String, medsModel?) -> Unit)
-    fun getAllmeds(callback: (Boolean, String, List<medsModel?>) -> Unit)
+    fun getAllmeds(callback: (Boolean, String, List<medsModel>) -> Unit)
 
 }

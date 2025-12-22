@@ -1,7 +1,5 @@
 package com.example.medi.view
 
-
-
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -16,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
@@ -28,11 +27,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-
-
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -42,42 +38,24 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.medi.R
+import com.example.medi.model.medsModel
 import com.example.medi.repository.medsRepoImpl
 import com.example.medi.ui.theme.Background
 import com.example.medi.ui.theme.IconActive
 import com.example.medi.ui.theme.TextColor
 import com.example.medi.viewModel.MedsViewModel
 
-
 @Composable
 fun MedsScreen() {
-    var medsName by remember { mutableStateOf("") }
-    var medsDose by remember { mutableStateOf("") }
-    var medsTime by remember { mutableStateOf("") }
-    var medsFrequency by remember { mutableStateOf("") }
-    var medsNote by remember { mutableStateOf("") }
-    var medsStatus by remember { mutableStateOf("") }
     val medsViewModel = remember { MedsViewModel(medsRepoImpl()) }
-    val allmeds= medsViewModel.allmeds.observeAsState(inital=emptyList())
 
-    val meds= medsViewModel.meds.observeAsState()
 
-    LaunchedEffect(meds.value) {
+    val allmeds = medsViewModel.allmeds.observeAsState(initial = emptyList())
+
+
+    LaunchedEffect(Unit) {
         medsViewModel.getAllmeds()
-        meds.value?.let {
-            medsName = it.name,
-            medsDose = it.dose,
-            medsTime = it.time,
-            medsFrequency = it.frequency,
-            medsNote = it.note,
-            medsStatus = it.status
-        }
-
-
     }
-
-
-
 
     Column(
         modifier = Modifier
@@ -85,15 +63,20 @@ fun MedsScreen() {
             .background(color = Background)
             .padding(16.dp)
     ) {
-Row {
-    Icon(painterResource(R.drawable.pills_icon), null, modifier = Modifier.padding(end = 10.dp).size(25.dp), tint = IconActive
-    )
-    Text(
-        text = "Medications",
-        fontSize = 24.sp,
-        fontWeight = FontWeight.Bold
-    )
-}
+        Row {
+            Icon(
+                painterResource(R.drawable.pills_icon),
+                null,
+                modifier = Modifier.padding(end = 10.dp).size(25.dp),
+                tint = IconActive
+            )
+            Text(
+                text = "Medications",
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold
+            )
+        }
+
         Text(
             text = "Manage your medication list",
             fontSize = 14.sp,
@@ -119,32 +102,28 @@ Row {
 
         Spacer(Modifier.height(16.dp))
 
-
-        LazyColumn {
-            items(4) {
-                MedicationCard(
-                    name = "Vitamin D3",
-                    dose = "1000 IU",
-                    time = "08:00",
-                    frequency = "Daily",
-                    note = "Take with breakfast",
-                    status = "Pending"
-                )
+        // Display medications list
+        if (allmeds.value.isEmpty()) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text("No medications found", color = Color.Gray)
+            }
+        } else {
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                items(items = allmeds.value) { med ->
+                    MedicationCard(med = med)
+                }
             }
         }
     }
 }
 
-
 @Composable
-fun MedicationCard(
-    name: String,
-    dose: String,
-    time: String,
-    frequency: String,
-    note: String,
-    status: String
-) {
+fun MedicationCard(med: medsModel) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -152,25 +131,19 @@ fun MedicationCard(
         shape = RoundedCornerShape(18.dp),
         border = BorderStroke(1.dp, Color.LightGray),
         colors = CardDefaults.cardColors(
-            containerColor = Color.White // placeholder
+            containerColor = Color.White
         )
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-
-
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Box(
                         modifier = Modifier
                             .size(42.dp)
-                            .background(
-                                Color(0xFFE6F4F1),
-                                CircleShape
-                            ),
+                            .background(Color(0xFFE6F4F1), CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
@@ -184,39 +157,36 @@ fun MedicationCard(
                     Spacer(Modifier.width(12.dp))
 
                     Column {
-                        Text(name, fontWeight = FontWeight.Bold)
-                        Text(dose, color = TextColor)
+                        Text(med.name, fontWeight = FontWeight.Bold)
+                        Text(med.dosage, color = TextColor)
                     }
                 }
-
-
             }
 
             Spacer(Modifier.height(10.dp))
 
-            // ---- TIME ----
+            // TIME
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
-                    painter=painterResource(R.drawable.baseline_access_time_24),
+                    painter = painterResource(R.drawable.baseline_access_time_24),
                     contentDescription = null,
                     tint = Color.Gray,
                     modifier = Modifier.size(18.dp)
                 )
                 Spacer(Modifier.width(6.dp))
-                Text("$time • $frequency", color = TextColor)
+                Text("${med.schedule} • ${med.frequency}", color = TextColor)
             }
 
             Spacer(Modifier.height(10.dp))
             HorizontalDivider()
             Spacer(Modifier.height(10.dp))
 
-
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = note,
+                    text = med.notes,
                     fontStyle = FontStyle.Italic,
                     color = TextColor
                 )
@@ -224,13 +194,13 @@ fun MedicationCard(
                 Box(
                     modifier = Modifier
                         .background(
-                            if (status == "Taken") Color(0xFFDFF5EA)
+                            if (med.status == "Taken") Color(0xFFDFF5EA)
                             else Color(0xFFEAF3F7),
                             RoundedCornerShape(50)
                         )
                         .padding(horizontal = 12.dp, vertical = 4.dp)
                 ) {
-                    Text(status, fontSize = 12.sp)
+                    Text(med.status, fontSize = 12.sp)
                 }
             }
         }
