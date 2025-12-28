@@ -10,9 +10,9 @@ import com.example.medi.repository.appointmentRepo
 
 class AppointmentViewModel (val repo: appointmentRepo): ViewModel(){
 
-    fun addAppointment(id: String, appointmentModel: appointmentModel, callback: (Boolean, String) -> Unit){
+    fun addAppointment( appointmentModel: appointmentModel, callback: (Boolean, String) -> Unit){
 
-        repo.addAppointment(id,appointmentModel,callback)
+        repo.addAppointment(appointmentModel,callback)
     }
     fun deleteAppointment(id: String, callback: (Boolean, String) -> Unit){
 
@@ -34,7 +34,7 @@ class AppointmentViewModel (val repo: appointmentRepo): ViewModel(){
     val singleAppointment: LiveData<appointmentModel?>
         get() = _singleAppointment
 
-    fun getAppointmentById(id: String, callback: (Boolean, String, appointmentModel?) -> Unit){
+    fun getAppointmentById(id: String){
 
         repo.getAppointmentById(id){
             success, message, data ->
@@ -46,7 +46,7 @@ class AppointmentViewModel (val repo: appointmentRepo): ViewModel(){
         }
     }
 
-    fun getAllAppointments(callback: (Boolean, String, List<appointmentModel>) -> Unit){
+    fun getAllAppointments(){
 
         repo.getAllAppointments{
             success, message, data ->
@@ -57,5 +57,6 @@ class AppointmentViewModel (val repo: appointmentRepo): ViewModel(){
             }
         }
     }
-    }
+
+    companion object
 }

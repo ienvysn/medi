@@ -9,14 +9,15 @@ import com.google.firebase.database.ValueEventListener
 
 class medsRepoImpl: medsRepo {
     val database: FirebaseDatabase = FirebaseDatabase.getInstance()
-    val ref: DatabaseReference=database.getReference("meds")
+    val ref: DatabaseReference=database.getReference("medicines")
 
     override fun addMeds(
-        id: String,
         medsModel: medsModel,
         callback: (Boolean, String) -> Unit
     ) {
         val id=ref.push().toString()
+
+        medsModel.id=id
         ref.child(id).setValue(medsModel).addOnCompleteListener{
             if (it.isSuccessful){
                 callback(true,"Med Added Successfully")

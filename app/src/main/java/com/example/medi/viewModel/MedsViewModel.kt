@@ -10,8 +10,8 @@ import com.example.medi.repository.medsRepo
 
 class MedsViewModel (val repo: medsRepo): ViewModel(){
 
-    fun addMeds(id: String,medsModel: medsModel,callback: (Boolean, String) -> Unit){
-        repo.addMeds(id,medsModel,callback)
+    fun addMeds(medsModel: medsModel,callback: (Boolean, String) -> Unit){
+        repo.addMeds(medsModel,callback)
     }
 
     fun updateMeds(id: String,medsModel: medsModel,callback: (Boolean, String) -> Unit){

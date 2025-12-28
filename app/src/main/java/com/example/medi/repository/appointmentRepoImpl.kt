@@ -9,16 +9,16 @@ import com.google.firebase.database.ValueEventListener
 
 class appointmentRepoImpl: appointmentRepo {
     val database: FirebaseDatabase = FirebaseDatabase.getInstance()
-    val ref: DatabaseReference=database.getReference("appointment")
+    val ref: DatabaseReference=database.getReference("appointments")
 
 
     override fun addAppointment(
-        id: String,
+
         appointmentModel: appointmentModel,
         callback: (Boolean, String) -> Unit
     ) {
         val id=ref.push().toString()
-
+        appointmentModel.id=id;
         ref.child(id).setValue(appointmentModel).addOnCompleteListener{
             if (it.isSuccessful){
                 callback(true,"Appointment Added Successfully")

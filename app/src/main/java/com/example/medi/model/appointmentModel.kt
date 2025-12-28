@@ -1,12 +1,12 @@
 package com.example.medi.model
 
 data class appointmentModel(
-    val id: String = "",
+    var id: String = "",
     val doctorName: String = "",
     val specialty: String? = null,
     val date: String = "",
     val time: String = "",
-    val location: String? = null,
+    val location: String = "",
     val notes: String? = null
 ) {
     fun toMap(): Map<String, Any?> {

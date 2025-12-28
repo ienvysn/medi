@@ -1,7 +1,5 @@
 package com.example.medi.view
 
-
-
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -20,34 +18,41 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.medi.R
+import com.example.medi.model.appointmentModel
 import com.example.medi.ui.theme.AppoinementBackground
 import com.example.medi.ui.theme.AquaIcon
 import com.example.medi.ui.theme.Background
-
 import com.example.medi.ui.theme.BorderOutline
-import com.example.medi.ui.theme.Card
+import com.example.medi.ui.theme.Card as CardColor
 import com.example.medi.ui.theme.ChipBackground
 import com.example.medi.ui.theme.DarkTextColor
 import com.example.medi.ui.theme.IconActive
 import com.example.medi.ui.theme.TextColor
 
-
 @Composable
 fun HomeScreen(){
+    val dummyAppointment = appointmentModel(
+        doctorName = "Dr. Michael Chen",
+        specialty = "Cardiologist",
+        date = "Sunday, Dec 14, 2025",
+        time = "14:30",
+        location = "Heart Care Clinic"
+    )
+
     LazyColumn(
         modifier = Modifier.fillMaxSize()
             .background(color = Background)
@@ -56,7 +61,7 @@ fun HomeScreen(){
         item {
             Card(
                 modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp, horizontal = 10.dp),
-                colors = CardDefaults.cardColors(containerColor = Card),
+                colors = CardDefaults.cardColors(containerColor = CardColor),
 
             ){
                 Column(modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp, horizontal = 10.dp)) {
@@ -133,8 +138,8 @@ fun HomeScreen(){
                         Text("View All", style = TextStyle(fontSize = 15.sp), color = TextColor)
                     }
 
-                    AppointmentCard()
-                    AppointmentCard()
+                    AppointmentCard(dummyAppointment)
+                    AppointmentCard(dummyAppointment)
                 }
             }
         }
@@ -261,7 +266,7 @@ fun MedCard() {
 }
 
 @Composable
-fun AppointmentCard() {
+fun AppointmentCard(appointment: appointmentModel) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -299,13 +304,13 @@ fun AppointmentCard() {
 
                 Column {
                     Text(
-                        text = "Dr. Michael Chen",
+                        text = appointment.doctorName,
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
                         color =  Color.Black
                     )
                     Text(
-                        text = "Cardiologist",
+                        text = appointment.specialty ?: "",
                         fontSize = 14.sp,
                         color = TextColor
                     )
@@ -325,7 +330,7 @@ fun AppointmentCard() {
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "Sunday, Dec 14, 2025",
+                    text = appointment.date,
                     fontSize = 14.sp,
                     color = Color.Black
 
@@ -345,7 +350,7 @@ fun AppointmentCard() {
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "14:30",
+                    text = appointment.time,
                     fontSize = 14.sp,
                     color = Color.Black
 
@@ -364,7 +369,7 @@ fun AppointmentCard() {
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "Heart Care Clinic",
+                    text = appointment.location ?: "",
                     fontSize = 14.sp,
                     color = Color.Black
                 )
@@ -372,5 +377,3 @@ fun AppointmentCard() {
         }
     }
 }
-
-
