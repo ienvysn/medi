@@ -1,6 +1,5 @@
 package com.example.medi.model
 
-
 data class medsModel(
     var id: String = "",
     val name: String = "",
@@ -8,9 +7,10 @@ data class medsModel(
     val schedule: String = "",
     val frequency: String = "",
     val notes: String = "",
-    val status: String = ""
-){
-    fun toMap(): Map<String,Any> {
+    val status: String = "",
+    val dayOfWeek: Int = -1
+) {
+    fun toMap(): Map<String, Any> {
         return mapOf(
             "id" to id,
             "name" to name,
@@ -18,9 +18,8 @@ data class medsModel(
             "schedule" to schedule,
             "frequency" to frequency,
             "notes" to notes,
-            "status" to status
+            "status" to status,
+            "dayOfWeek" to dayOfWeek
         )
     }
 }
-
-

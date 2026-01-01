@@ -33,27 +33,42 @@ import com.example.medi.ui.theme.DarkTextColor
 import com.example.medi.ui.theme.IconActive
 import com.example.medi.ui.theme.TextColor
 import com.example.medi.viewModel.AppointmentViewModel
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.TimePicker
+import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.material3.rememberTimePickerState
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.IconButton
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import java.util.Calendar
+
 
 @Composable
 fun AppointmentScreen() {
+    val context = LocalContext.current
     val appointmentViewModel = remember { AppointmentViewModel(appointmentRepoImpl()) }
     val allAppointments = appointmentViewModel.appointments.observeAsState(initial = emptyList())
 
 
     var showDialog by remember { mutableStateOf(false) }
-
-    if (showDialog) {
-        AddAppointmentDialog(
-            onDismiss = { showDialog = false },
-            onAdd = { newAppointment ->
-                showDialog = false
-
-            }
-        )
-    }
+    var selectedAppointment by remember { mutableStateOf<appointmentModel?>(null) }
 
     LaunchedEffect(Unit) {
         appointmentViewModel.getAllAppointments()
+    }
+
+    // Open Dialog
+    if (showDialog) {
+        AppointmentOperationDialog(
+            appointmentToEdit = selectedAppointment,
+            onDismiss = {
+                showDialog = false
+                selectedAppointment = null
+            }
+        )
     }
 
     Column(
@@ -93,8 +108,10 @@ fun AppointmentScreen() {
             }
 
             Button(
-
-                onClick = { showDialog = true },
+                onClick = {
+                    selectedAppointment = null
+                    showDialog = true
+                },
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Card)
             ) {
@@ -103,6 +120,7 @@ fun AppointmentScreen() {
         }
 
         Spacer(modifier = Modifier.height(16.dp))
+
 
         OutlinedTextField(
             value = "",
@@ -117,7 +135,7 @@ fun AppointmentScreen() {
         )
 
         Spacer(modifier = Modifier.height(12.dp))
-        Spacer(modifier = Modifier.height(8.dp))
+
 
         if (allAppointments.value.isEmpty()) {
             Box(
@@ -131,46 +149,106 @@ fun AppointmentScreen() {
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 items(items = allAppointments.value) { appoint ->
-
-                    AppointmentCard(appoint)
+                    AppointmentCard(
+                        appointment = appoint,
+                        onEdit = {
+                            selectedAppointment = appoint
+                            showDialog = true
+                        },
+                        onDelete = {
+                            appointmentViewModel.deleteAppointment(appoint.id) { success, msg ->
+                                Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+                                if (success) {
+                                    appointmentViewModel.getAllAppointments()
+                                }
+                            }
+                        }
+                    )
                 }
             }
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddAppointmentDialog(
+fun AppointmentOperationDialog(
+    appointmentToEdit: appointmentModel? = null,
     onDismiss: () -> Unit,
-    onAdd: (appointmentModel) -> Unit
 ) {
     val context = LocalContext.current
-
     val appointmentViewModel = remember { AppointmentViewModel(appointmentRepoImpl()) }
 
-    var docName by remember { mutableStateOf("") }
-    var speciality by remember { mutableStateOf("") }
-    var date by remember { mutableStateOf("") }
-    var time by remember { mutableStateOf("") }
-    var location by remember { mutableStateOf("") }
-    var notes by remember { mutableStateOf("") }
+
+    var docName by remember { mutableStateOf(appointmentToEdit?.doctorName ?: "") }
+    var speciality by remember { mutableStateOf(appointmentToEdit?.specialty ?: "") }
+    var date by remember { mutableStateOf(appointmentToEdit?.date ?: "") }
+    var time by remember { mutableStateOf(appointmentToEdit?.time ?: "") }
+    var location by remember { mutableStateOf(appointmentToEdit?.location ?: "") }
+    var notes by remember { mutableStateOf(appointmentToEdit?.notes ?: "") }
+
+    // Date/Time Pickers State
+    var openDatePicker by remember { mutableStateOf(false) }
+    val datePickerState = rememberDatePickerState()
+    var openTimePicker by remember { mutableStateOf(false) }
+    val timePickerState = rememberTimePickerState()
+
+    // --- Date Picker Logic ---
+    if (openDatePicker) {
+        DatePickerDialog(
+            onDismissRequest = { openDatePicker = false },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        datePickerState.selectedDateMillis?.let { millis ->
+                            val formatter = SimpleDateFormat("MM/dd/yyyy", Locale.getDefault())
+                            date = formatter.format(Date(millis))
+                        }
+                        openDatePicker = false
+                    }
+                ) { Text("OK") }
+            },
+            dismissButton = {
+                TextButton(onClick = { openDatePicker = false }) { Text("Cancel") }
+            }
+        ) {
+            DatePicker(state = datePickerState)
+        }
+    }
+
+
+    if (openTimePicker) {
+        AlertDialog(
+            onDismissRequest = { openTimePicker = false },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        val cal = Calendar.getInstance()
+                        cal.set(Calendar.HOUR_OF_DAY, timePickerState.hour)
+                        cal.set(Calendar.MINUTE, timePickerState.minute)
+                        val formatter = SimpleDateFormat("hh:mm a", Locale.getDefault())
+                        time = formatter.format(cal.time)
+                        openTimePicker = false
+                    }
+                ) { Text("OK") }
+            },
+            dismissButton = {
+                TextButton(onClick = { openTimePicker = false }) { Text("Cancel") }
+            },
+            text = { TimePicker(state = timePickerState) }
+        )
+    }
 
     AlertDialog(
         onDismissRequest = onDismiss,
         shape = RoundedCornerShape(20.dp),
         containerColor = Color.White,
         title = {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "Add New Appointment",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.SemiBold
-                )
-            }
+            Text(
+                text = if (appointmentToEdit == null) "Add New Appointment" else "Edit Appointment",
+                fontSize = 18.sp,
+                fontWeight = FontWeight.SemiBold
+            )
         },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -179,12 +257,7 @@ fun AddAppointmentDialog(
                 TextField(
                     value = docName,
                     onValueChange = { docName = it },
-                    placeholder = {
-                        Text(
-                            "e.g. Dr. Sarah Johnson",
-                            fontSize = 13.sp
-                        )
-                    },
+                    placeholder = { Text("e.g. Dr. Sarah Johnson", fontSize = 13.sp) },
                     singleLine = true,
                     shape = RoundedCornerShape(14.dp),
                     modifier = Modifier.fillMaxWidth(),
@@ -202,38 +275,53 @@ fun AddAppointmentDialog(
                     onValueChange = { speciality = it },
                     placeholder = { Text("e.g. Cardiologist", fontSize = 12.sp) },
                     singleLine = true,
-                    modifier = Modifier.fillMaxWidth().height(36.dp),
+                    modifier = Modifier.fillMaxWidth().height(50.dp),
                     shape = RoundedCornerShape(14.dp)
                 )
 
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    // Date Field
                     Column(modifier = Modifier.weight(1f)) {
                         Text("Date", fontSize = 12.sp)
                         OutlinedTextField(
                             value = date,
-                            onValueChange = { date = it },
-                            placeholder = { Text("mm / dd / yyyy", fontSize = 12.sp) },
+                            onValueChange = {},
+                            readOnly = true,
+                            placeholder = { Text("mm/dd/yyyy", fontSize = 12.sp) },
                             singleLine = true,
                             trailingIcon = {
-                                Icon(
-                                    painter = painterResource(R.drawable.calender_icon),
-                                    contentDescription = null,
-                                    modifier = Modifier.size(16.dp)
-                                )
+                                IconButton(onClick = { openDatePicker = true }) {
+                                    Icon(
+                                        painter = painterResource(R.drawable.calender_icon),
+                                        contentDescription = "Select Date",
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                }
                             },
-                            modifier = Modifier.fillMaxWidth().height(36.dp),
+                            modifier = Modifier.fillMaxWidth().height(50.dp),
                             shape = RoundedCornerShape(14.dp)
                         )
                     }
 
+                    // Time Field
                     Column(modifier = Modifier.weight(1f)) {
                         Text("Time", fontSize = 12.sp)
                         OutlinedTextField(
                             value = time,
-                            onValueChange = { time = it },
+                            onValueChange = {},
+                            readOnly = true,
                             placeholder = { Text("09:00 AM", fontSize = 12.sp) },
                             singleLine = true,
-                            modifier = Modifier.fillMaxWidth().height(36.dp),
+                            trailingIcon = {
+                                IconButton(onClick = { openTimePicker = true }) {
+                                    Icon(
+                                        painter = painterResource(R.drawable.baseline_access_time_24),
+                                        contentDescription = "Select Time",
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                }
+                            },
+                            modifier = Modifier.fillMaxWidth().height(50.dp),
                             shape = RoundedCornerShape(14.dp)
                         )
                     }
@@ -245,7 +333,7 @@ fun AddAppointmentDialog(
                     onValueChange = { location = it },
                     placeholder = { Text("e.g. City Medical Center", fontSize = 12.sp) },
                     singleLine = true,
-                    modifier = Modifier.fillMaxWidth().height(36.dp),
+                    modifier = Modifier.fillMaxWidth().height(50.dp),
                     shape = RoundedCornerShape(14.dp)
                 )
 
@@ -260,56 +348,63 @@ fun AddAppointmentDialog(
                 )
             }
         },
-
         confirmButton = {
             Button(
                 onClick = {
-                    val newAppointment = appointmentModel(
-                        id = "",
-                        doctorName = docName,
-                        specialty = speciality,
-                        date = date,
-                        time = time,
-                        location = location,
-                        notes = notes
-                    )
+                    if (docName.isBlank() || date.isBlank() || time.isBlank()) {
+                        Toast.makeText(context, "Please fill required fields", Toast.LENGTH_SHORT).show()
+                    } else {
+                        if (appointmentToEdit == null) {
 
-                    if (newAppointment.doctorName.isEmpty() || newAppointment.date.isEmpty() || newAppointment.time.isEmpty()) {
-                        Toast.makeText(context, "Please fill in all required fields", Toast.LENGTH_SHORT).show()
-                        return@Button
+                            val newAppointment = appointmentModel(
+                                id = "",
+                                doctorName = docName,
+                                specialty = speciality,
+                                date = date,
+                                time = time,
+                                location = location,
+                                notes = notes
+                            )
+                            appointmentViewModel.addAppointment(newAppointment) { success, message ->
+                                if (success) {
+                                    Toast.makeText(context, "Added Successfully", Toast.LENGTH_SHORT).show()
+                                    onDismiss()
+                                } else {
+                                    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                        } else {
+
+                            val updatedAppointment = appointmentToEdit.copy(
+                                doctorName = docName,
+                                specialty = speciality,
+                                date = date,
+                                time = time,
+                                location = location,
+                                notes = notes
+                            )
+                            appointmentViewModel.updateAppointment(appointmentToEdit.id, updatedAppointment) { success, message ->
+                                if (success) {
+                                    Toast.makeText(context, "Updated Successfully", Toast.LENGTH_SHORT).show()
+                                    onDismiss()
+                                } else {
+                                    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                        }
                     }
-                 appointmentViewModel.addAppointment(newAppointment){
-                     success,message->{
-                         if (success) {
-                             Log.d("success",message)
-
-                             Toast.makeText(context, "Appointment Added Successfully", Toast.LENGTH_SHORT).show()
-
-                         }
-                        else{
-                             Toast.makeText(context, "Appointment Failed To Add", Toast.LENGTH_SHORT).show()
-                            Log.d("error",message)
-
-                         }
-
-                 }
-                 }
                 },
-                modifier = Modifier
-                    .height(44.dp)
-                    .width(140.dp),
+                modifier = Modifier.height(44.dp).width(140.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Card),
                 shape = RoundedCornerShape(14.dp)
             ) {
-                Text("Add")
+                Text(if (appointmentToEdit == null) "Add" else "Update")
             }
         },
         dismissButton = {
             OutlinedButton(
                 onClick = onDismiss,
-                modifier = Modifier
-                    .height(44.dp)
-                    .width(110.dp),
+                modifier = Modifier.height(44.dp).width(110.dp),
                 shape = RoundedCornerShape(14.dp)
             ) {
                 Text("Cancel")

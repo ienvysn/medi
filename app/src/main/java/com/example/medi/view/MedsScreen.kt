@@ -23,18 +23,21 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
+import androidx.compose.material3.TimePicker
+import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -64,20 +67,25 @@ import com.example.medi.viewModel.MedsViewModel
 @Composable
 fun MedsScreen() {
     val medsViewModel = remember { MedsViewModel(medsRepoImpl()) }
-
-
     val allmeds = medsViewModel.allmeds.observeAsState(initial = emptyList())
-
+    val context = LocalContext.current
 
     LaunchedEffect(Unit) {
         medsViewModel.getAllmeds()
     }
+
     var showDialog by remember { mutableStateOf(false) }
+    var selectedMed by remember { mutableStateOf<medsModel?>(null) }
+
 
     if (showDialog) {
-        AddMedicationDialog(
+        MedicationOperationDialog(
+            medToEdit = selectedMed,
             viewModel = medsViewModel,
-            onDismiss = { showDialog = false }
+            onDismiss = {
+                showDialog = false
+                selectedMed = null 
+            }
         )
     }
 
@@ -117,7 +125,10 @@ fun MedsScreen() {
             }
 
             Button(
-                onClick = { showDialog = true },
+                onClick = {
+                    selectedMed = null 
+                    showDialog = true
+                },
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Card)
             ) {
@@ -138,7 +149,7 @@ fun MedsScreen() {
             shape = RoundedCornerShape(14.dp),
             colors = OutlinedTextFieldDefaults.colors(
                 unfocusedBorderColor = Color.LightGray,
-                focusedBorderColor = Color.LightGray
+                focusedBorderColor = IconActive
             )
         )
 
@@ -156,15 +167,32 @@ fun MedsScreen() {
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 items(items = allmeds.value) { med ->
-                    MedicationCard(med = med)
+                    MedicationCard(
+                        med = med,
+                        onEdit = {
+                            selectedMed = med 
+                            showDialog = true
+                        },
+                        onDelete = {
+                            medsViewModel.deleteMeds(med.id) { success, message ->
+                                Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                                if (success) medsViewModel.getAllmeds()
+                            }
+                        }
+                    )
                 }
             }
         }
     }
 }
-
 @Composable
-fun MedicationCard(med: medsModel) {
+fun MedicationCard(
+    med: medsModel,
+    onEdit: () -> Unit,
+    onDelete: () -> Unit
+) {
+    var showMenu by remember { mutableStateOf(false) }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -178,9 +206,13 @@ fun MedicationCard(med: medsModel) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically 
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.weight(1f) 
+                ) {
                     Box(
                         modifier = Modifier
                             .size(42.dp)
@@ -202,11 +234,41 @@ fun MedicationCard(med: medsModel) {
                         Text(med.dosage, color = TextColor)
                     }
                 }
+
+                Box {
+                    IconButton(onClick = { showMenu = true }) {
+                        Icon(
+                            painter = painterResource(R.drawable.outline_more_vert_24),
+                            contentDescription = "Options",
+                            tint = Color.Gray
+                        )
+                    }
+
+                    DropdownMenu(
+                        expanded = showMenu,
+                        onDismissRequest = { showMenu = false },
+                        modifier = Modifier.background(Color.White)
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text("Edit") },
+                            onClick = {
+                                showMenu = false
+                                onEdit()
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Delete", color = Color.Red) },
+                            onClick = {
+                                showMenu = false
+                                onDelete()
+                            }
+                        )
+                    }
+                }
             }
 
             Spacer(Modifier.height(10.dp))
 
-            // TIME
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
                     painter = painterResource(R.drawable.baseline_access_time_24),
@@ -227,9 +289,10 @@ fun MedicationCard(med: medsModel) {
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = med.notes,
+                    text = if(med.notes.isNotEmpty()) med.notes else "No notes",
                     fontStyle = FontStyle.Italic,
-                    color = TextColor
+                    color = TextColor,
+                    modifier = Modifier.weight(1f)
                 )
 
                 Box(
@@ -241,7 +304,7 @@ fun MedicationCard(med: medsModel) {
                         )
                         .padding(horizontal = 12.dp, vertical = 4.dp)
                 ) {
-                    Text(if(med.status.isNotEmpty()) med.status else "Pending", fontSize = 12.sp)
+                    Text(if (med.status.isNotEmpty()) med.status else "Pending", fontSize = 12.sp)
                 }
             }
         }
@@ -250,28 +313,57 @@ fun MedicationCard(med: medsModel) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddMedicationDialog(
+fun MedicationOperationDialog(
+    medToEdit: medsModel? = null, 
     viewModel: MedsViewModel,
     onDismiss: () -> Unit
 ) {
-    var medName by remember { mutableStateOf("") }
-    var dosage by remember { mutableStateOf("") }
-    var time by remember { mutableStateOf("08:00 AM") }
-    var frequency by remember { mutableStateOf("Daily") }
-    var notes by remember { mutableStateOf("") }
+    var medName by remember { mutableStateOf(medToEdit?.name ?: "") }
+    var dosage by remember { mutableStateOf(medToEdit?.dosage ?: "") }
+    var time by remember { mutableStateOf(medToEdit?.schedule ?: "08:00 AM") }
+    var frequency by remember { mutableStateOf(medToEdit?.frequency ?: "Daily") }
+    var notes by remember { mutableStateOf(medToEdit?.notes ?: "") }
 
     var expanded by remember { mutableStateOf(false) }
     val options = listOf("Daily", "Twice", "Thrice", "Weekly", "As needed")
 
     val context = LocalContext.current
-    val fieldShape = RoundedCornerShape(12.dp)
+    val fieldShape = RoundedCornerShape(14.dp)
+
+    var openTimePicker by remember { mutableStateOf(false) }
+    val timePickerState = rememberTimePickerState()
+
+    if (openTimePicker) {
+        AlertDialog(
+            onDismissRequest = { openTimePicker = false },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        val cal = java.util.Calendar.getInstance()
+                        cal.set(java.util.Calendar.HOUR_OF_DAY, timePickerState.hour)
+                        cal.set(java.util.Calendar.MINUTE, timePickerState.minute)
+                        val formatter = java.text.SimpleDateFormat("hh:mm a", java.util.Locale.getDefault())
+                        time = formatter.format(cal.time)
+                        openTimePicker = false
+                    }
+                ) { Text("OK") }
+            },
+            dismissButton = {
+                TextButton(onClick = { openTimePicker = false }) { Text("Cancel") }
+            },
+            text = { TimePicker(state = timePickerState) }
+        )
+    }
 
     AlertDialog(
         onDismissRequest = onDismiss,
+        shape = RoundedCornerShape(20.dp),
+        containerColor = Color.White,
         title = {
             Text(
-                text = "Add New Medication",
-                fontWeight = FontWeight.SemiBold
+                text = if (medToEdit == null) "Add New Medication" else "Edit Medication",
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 18.sp
             )
         },
         text = {
@@ -280,7 +372,6 @@ fun AddMedicationDialog(
                 modifier = Modifier.fillMaxWidth()
             ) {
 
-                // Medication name
                 OutlinedTextField(
                     value = medName,
                     onValueChange = { medName = it },
@@ -288,10 +379,13 @@ fun AddMedicationDialog(
                     placeholder = { Text("e.g., Vitamin D3") },
                     singleLine = true,
                     shape = fieldShape,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = IconActive,
+                        unfocusedBorderColor = Color.LightGray
+                    )
                 )
 
-                // Dosage + Time
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
 
                     OutlinedTextField(
@@ -301,20 +395,38 @@ fun AddMedicationDialog(
                         placeholder = { Text("e.g., 500mg") },
                         singleLine = true,
                         shape = fieldShape,
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(1f),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = IconActive,
+                            unfocusedBorderColor = Color.LightGray
+                        )
                     )
 
                     OutlinedTextField(
                         value = time,
-                        onValueChange = { time = it },
+                        onValueChange = { },
+                        readOnly = true, 
                         label = { Text("Time") },
                         singleLine = true,
                         shape = fieldShape,
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(1f),
+                        trailingIcon = {
+                            IconButton(onClick = { openTimePicker = true }) {
+                                Icon(
+                                    painter = painterResource(R.drawable.baseline_access_time_24),
+                                    contentDescription = "Select Time",
+                                    tint = IconActive,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+                        },
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = IconActive,
+                            unfocusedBorderColor = Color.LightGray
+                        )
                     )
                 }
 
-                // Frequency dropdown
                 ExposedDropdownMenuBox(
                     expanded = expanded,
                     onExpandedChange = { expanded = !expanded }
@@ -330,18 +442,23 @@ fun AddMedicationDialog(
                         shape = fieldShape,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .menuAnchor()
+                            .menuAnchor(),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = IconActive,
+                            unfocusedBorderColor = Color.LightGray
+                        )
                     )
 
                     ExposedDropdownMenu(
                         expanded = expanded,
-                        onDismissRequest = { expanded = false }
+                        onDismissRequest = { expanded = false },
+                        modifier = Modifier.background(Color.White)
                     ) {
-                        options.forEach {
+                        options.forEach { option ->
                             DropdownMenuItem(
-                                text = { Text(it) },
+                                text = { Text(option) },
                                 onClick = {
-                                    frequency = it
+                                    frequency = option
                                     expanded = false
                                 }
                             )
@@ -349,7 +466,6 @@ fun AddMedicationDialog(
                     }
                 }
 
-                // Notes
                 OutlinedTextField(
                     value = notes,
                     onValueChange = { notes = it },
@@ -358,47 +474,75 @@ fun AddMedicationDialog(
                     shape = fieldShape,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(90.dp)
+                        .height(90.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = IconActive,
+                        unfocusedBorderColor = Color.LightGray
+                    )
                 )
             }
         },
         confirmButton = {
             Button(
-
+                modifier = Modifier
+                    .height(44.dp)
+                    .width(140.dp),
+                shape = RoundedCornerShape(14.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Card),
                 onClick = {
-                    val newMeds = medsModel(
-                        name = medName,
-                        dosage = dosage,
-                        schedule = time,
-                        frequency = frequency,
-                        notes = notes,
-                        status = "Pending"
-                    )
-
                     if (medName.isBlank() || dosage.isBlank() || time.isBlank()) {
-                        Toast
-                            .makeText(context, "Please fill required fields", Toast.LENGTH_SHORT)
-                            .show()
+                        Toast.makeText(context, "Please fill required fields", Toast.LENGTH_SHORT).show()
                     } else {
-                        viewModel.addMeds(newMeds) { success, message ->
-                            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-                            if (success) {
-                                viewModel.getAllmeds()
-                                onDismiss()
+                        if (medToEdit == null) {
+                            val currentDayOfWeek = java.util.Calendar.getInstance().get(java.util.Calendar.DAY_OF_WEEK)
+
+                            val newMeds = medsModel(
+                                id = "",
+                                name = medName,
+                                dosage = dosage,
+                                schedule = time,
+                                frequency = frequency,
+                                notes = notes,
+                                status = "Pending"
+                                
+                            )
+                            viewModel.addMeds(newMeds) { success, message ->
+                                Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                                if (success) {
+                                    viewModel.getAllmeds()
+                                    onDismiss()
+                                }
+                            }
+                        } else {
+                            val updatedMed = medToEdit.copy(
+                                name = medName,
+                                dosage = dosage,
+                                schedule = time,
+                                frequency = frequency,
+                                notes = notes
+                            )
+                            viewModel.updateMeds(medToEdit.id, updatedMed) { success, message ->
+                                Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                                if (success) {
+                                    viewModel.getAllmeds()
+                                    onDismiss()
+                                }
                             }
                         }
                     }
                 }
-
-                        ,
-
             ) {
-                Text("Add Medication")
+                Text(if (medToEdit == null) "Add" else "Update")
             }
         },
         dismissButton = {
-            OutlinedButton(onClick = onDismiss) {
+            OutlinedButton(
+                onClick = onDismiss,
+                modifier = Modifier
+                    .height(44.dp)
+                    .width(110.dp),
+                shape = RoundedCornerShape(14.dp)
+            ) {
                 Text("Cancel")
             }
         }

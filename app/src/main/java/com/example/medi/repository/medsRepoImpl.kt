@@ -15,7 +15,7 @@ class medsRepoImpl: medsRepo {
         medsModel: medsModel,
         callback: (Boolean, String) -> Unit
     ) {
-        val id=ref.push().toString()
+        val id = ref.push().key ?: return
 
         medsModel.id=id
         ref.child(id).setValue(medsModel).addOnCompleteListener{

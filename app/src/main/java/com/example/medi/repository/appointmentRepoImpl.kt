@@ -17,7 +17,7 @@ class appointmentRepoImpl: appointmentRepo {
         appointmentModel: appointmentModel,
         callback: (Boolean, String) -> Unit
     ) {
-        val id=ref.push().toString()
+        val id = ref.push().key ?: return
         appointmentModel.id=id;
         ref.child(id).setValue(appointmentModel).addOnCompleteListener{
             if (it.isSuccessful){
