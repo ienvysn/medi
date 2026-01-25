@@ -111,7 +111,9 @@ fun DashboardBody() {
                 0 -> HomeScreen()
                 1 -> MedsScreen()
                 2 -> AppointmentScreen()
-                3 -> ProfileScreen()
+                3 -> ProfileScreen(
+
+                )
                 else -> HomeScreen()
             }
         }

@@ -8,6 +8,11 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import android.content.Context
+import android.net.Uri
+import com.cloudinary.android.MediaManager
+import com.cloudinary.android.callback.ErrorInfo
+import com.cloudinary.android.callback.UploadCallback
 
 class userRepoImpl: userRepo
 
@@ -157,6 +162,45 @@ class userRepoImpl: userRepo
                 callback(false, "User Not Updated")
             }
         }
+    }
+
+    override fun uploadProfileImage(
+        context: Context,
+        imageUri: Uri,
+        callback: (Boolean, String) -> Unit
+    ) {
+        try {
+            MediaManager.get()
+        } catch (e: Exception) {
+            val config = HashMap<String, String>()
+            config["cloud_name"] = "dl1xtmobx"
+            config["api_key"] = "648487842166852"
+            config["api_secret"] = "efYAaiPCuLfQ73MjEGp4hdPLCOU"
+
+             MediaManager.init(context, config)
+        }
+
+        MediaManager.get().upload(imageUri)
+            .callback(object : UploadCallback {
+                override fun onStart(requestId: String) {
+                }
+
+                override fun onProgress(requestId: String, bytes: Long, totalBytes: Long) {
+                }
+
+                override fun onSuccess(requestId: String, resultData: Map<*, *>) {
+                    val secureUrl = resultData["secure_url"] as? String ?: ""
+                    callback(true, secureUrl)
+                }
+
+                override fun onError(requestId: String, error: ErrorInfo) {
+                    callback(false, error.description)
+                }
+
+                override fun onReschedule(requestId: String, error: ErrorInfo) {
+                }
+            })
+            .dispatch()
     }
 
 

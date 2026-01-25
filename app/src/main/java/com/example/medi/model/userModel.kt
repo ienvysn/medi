@@ -7,6 +7,7 @@ data class userModel(
     val password: String = "",
     val dateOfBirth: String= "",
     val bloodType: String= "",
+    val profileImageUrl: String = ""
 ) {
 
     fun toMap(): Map<String,Any> {
@@ -16,7 +17,8 @@ data class userModel(
             "email" to email,
             "password" to password,
             "dateOfBirth" to dateOfBirth,
-            "bloodType" to bloodType
+            "bloodType" to bloodType,
+            "profileImageUrl" to profileImageUrl
         )
     }
 }

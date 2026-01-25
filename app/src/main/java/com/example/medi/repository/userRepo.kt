@@ -1,5 +1,7 @@
 package com.example.medi.repository
 
+import android.content.Context
+import android.net.Uri
 import com.example.medi.model.userModel
 
 interface userRepo {
@@ -12,6 +14,7 @@ interface userRepo {
     fun getUserById(userId: String,callback: (Boolean, String, userModel?) -> Unit)
     fun updateUser(userId: String,userModel: userModel,callback: (Boolean, String) -> Unit)
     fun addUserToDatabase(userId: String,userModel: userModel,callback: (Boolean, String) -> Unit)
+    fun uploadProfileImage(context: Context, imageUri: Uri, callback: (Boolean, String) -> Unit)
 
 
 

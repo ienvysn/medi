@@ -31,6 +31,10 @@ class UserViewModel(val repo: userRepo) : ViewModel() {
         repo.addUserToDatabase(userId,userModel,callback)
     }
 
+    fun uploadProfileImage(context: android.content.Context, imageUri: android.net.Uri, callback: (Boolean, String) -> Unit){
+        repo.uploadProfileImage(context, imageUri, callback)
+    }
+
 
     private  val _users = MutableLiveData<List<userModel?>>()
     val users: MutableLiveData<List<userModel?>>

@@ -27,6 +27,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -46,6 +47,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
@@ -90,6 +92,7 @@ fun RegisterBody() {
 
     var email by remember { mutableStateOf("") }
     var username by remember { mutableStateOf("") }
+    var isLoading by remember { mutableStateOf(false) }
 
     var calendar = Calendar.getInstance()
     var year = calendar.get(Calendar.YEAR)
@@ -234,38 +237,43 @@ fun RegisterBody() {
 
                         Spacer(modifier = Modifier.height(12.dp))
 
-                        OutlinedTextField(
-                            value = selectedDate,
-                            onValueChange = {},
-                            leadingIcon = {
-                                Icon(
-                                    painterResource(R.drawable.calender_icon),
-                                    contentDescription = "DOB",
-                                    tint = Color.Black,
-                                    modifier = Modifier.size(22.dp)
+                        Box(modifier = Modifier.fillMaxWidth().padding(horizontal = 15.dp)) {
+                            OutlinedTextField(
+                                value = selectedDate,
+                                onValueChange = {},
+                                leadingIcon = {
+                                    Icon(
+                                        painterResource(R.drawable.calender_icon),
+                                        contentDescription = "DOB",
+                                        tint = Color.Black,
+                                        modifier = Modifier.size(22.dp)
+                                    )
+                                },
+                                label = {
+                                    Text(
+                                        "Date of Birth",
+                                        style = TextStyle(color = Color.Black)
+                                    )
+                                },
+                                shape = RoundedCornerShape(15.dp),
+                                modifier = Modifier.fillMaxWidth(),
+                                readOnly = true,
+                                singleLine = true,
+                                colors = TextFieldDefaults.colors(
+                                    focusedContainerColor = InputBackground,
+                                    unfocusedContainerColor = InputBackground,
+                                    focusedIndicatorColor = Color.Gray,
+                                    unfocusedIndicatorColor = Color.Transparent,
+                                    disabledIndicatorColor = Color.Transparent
                                 )
-                            },
-                            label = {
-                                Text(
-                                    "Date of Birth",
-                                    style = TextStyle(color = Color.Black)
-                                )
-                            },
-                            shape = RoundedCornerShape(15.dp),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 15.dp)
-                                .clickable { datePickerDialog.show() },
-                            readOnly = true,
-                            singleLine = true,
-                            colors = TextFieldDefaults.colors(
-                                focusedContainerColor = InputBackground,
-                                unfocusedContainerColor = InputBackground,
-                                focusedIndicatorColor = Color.Gray,
-                                unfocusedIndicatorColor = Color.Transparent,
-                                disabledIndicatorColor = Color.Transparent
                             )
-                        )
+                            Box(
+                                modifier = Modifier
+                                    .matchParentSize()
+                                    .alpha(0f)
+                                    .clickable { datePickerDialog.show() }
+                            )
+                        }
                         Spacer(modifier = Modifier.height(12.dp))
 
                         OutlinedTextField(
@@ -321,15 +329,15 @@ fun RegisterBody() {
                                     Toast.makeText(context, "Please enter a valid email", Toast.LENGTH_SHORT).show()
                                     return@Button
                                 }
-                             
+
                                 if (password.isEmpty()) {
                                     Toast.makeText(context, "Please enter a password", Toast.LENGTH_SHORT).show()
                                     return@Button
                                 }
 
+
                                 userViewModel.register(email,password) { success, message, userId ->
                                     if (success) {
-
                                         val model= userModel(
                                             userId,
                                             username,
@@ -339,6 +347,7 @@ fun RegisterBody() {
                                             ""
                                         )
                                         userViewModel.addUserToDatabase(userId,model) { success, message ->
+                                            isLoading = false
                                             if (success) {
                                                 Toast.makeText(context, "Registered Successfully", Toast.LENGTH_SHORT).show()
                                                 val intent = Intent(context,
@@ -349,9 +358,13 @@ fun RegisterBody() {
                                                 Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
                                             }
                                         }
+                                    } else {
+                                        isLoading = false
+                                        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
                                     }
-                                    }
+                                }
                             },
+                            enabled = !isLoading,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(50.dp),
@@ -360,7 +373,11 @@ fun RegisterBody() {
                                 containerColor = Color(0xFF009688),
                             )
                         ) {
-                            Text(text = "Register", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                            if (isLoading) {
+                                CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
+                            } else {
+                                Text(text = "Register", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                            }
                         }
 
                         Spacer(modifier = Modifier.height(25.dp))
