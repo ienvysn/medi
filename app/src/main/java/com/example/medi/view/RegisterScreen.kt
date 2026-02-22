@@ -61,6 +61,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.testTag
 import com.example.medi.R
 import com.example.medi.model.userModel
 import com.example.medi.repository.userRepoImpl
@@ -165,7 +166,7 @@ fun RegisterBody() {
                         ,
                             modifier = Modifier.clickable {
                                 context.startActivity(Intent(context, LoginScreen::class.java))
-                            }
+                            }.testTag("login_link")
                         )
 
 
@@ -195,7 +196,8 @@ fun RegisterBody() {
                             singleLine = true,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 15.dp),
+                                .padding(horizontal = 15.dp)
+                                .testTag("username"),
                             colors = TextFieldDefaults.colors(
                                 focusedContainerColor = InputBackground,
                                 unfocusedContainerColor = InputBackground,
@@ -226,7 +228,8 @@ fun RegisterBody() {
                             singleLine = true,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 15.dp),
+                                .padding(horizontal = 15.dp)
+                                .testTag("email"),
                             colors = TextFieldDefaults.colors(
                                 focusedContainerColor = InputBackground,
                                 unfocusedContainerColor = InputBackground,
@@ -256,7 +259,7 @@ fun RegisterBody() {
                                     )
                                 },
                                 shape = RoundedCornerShape(15.dp),
-                                modifier = Modifier.fillMaxWidth(),
+                                modifier = Modifier.fillMaxWidth().testTag("dob_field"),
                                 readOnly = true,
                                 singleLine = true,
                                 colors = TextFieldDefaults.colors(
@@ -308,7 +311,8 @@ fun RegisterBody() {
                             },
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 15.dp),
+                                .padding(horizontal = 15.dp)
+                                .testTag("password"),
                             colors = TextFieldDefaults.colors(
                                 focusedContainerColor = InputBackground,
                                 unfocusedContainerColor = InputBackground,
@@ -367,7 +371,8 @@ fun RegisterBody() {
                             enabled = !isLoading,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(50.dp),
+                                .height(50.dp)
+                                .testTag("register_button"),
                             shape = RoundedCornerShape(20.dp),
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = Color(0xFF009688),

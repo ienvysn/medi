@@ -57,6 +57,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.testTag
 import com.example.medi.R
 import com.example.medi.repository.userRepoImpl
 import com.example.medi.ui.theme.InputBackground
@@ -139,7 +140,7 @@ fun LoginBody() {
                             ,
                             modifier = Modifier.clickable {
                                 context.startActivity(Intent(context, RegisterScreen::class.java))
-                            }
+                            }.testTag("register_link")
                         )
 
                         Spacer(modifier = Modifier.height(20.dp));
@@ -164,7 +165,8 @@ fun LoginBody() {
                             singleLine = true,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 15.dp),
+                                .padding(horizontal = 15.dp)
+                                .testTag("email"),
                             colors = TextFieldDefaults.colors(
                                 focusedContainerColor = InputBackground,
                                 unfocusedContainerColor = InputBackground,
@@ -208,7 +210,8 @@ fun LoginBody() {
                             },
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 15.dp),
+                                .padding(horizontal = 15.dp)
+                                .testTag("password"),
                             colors = TextFieldDefaults.colors(
                                 focusedContainerColor = InputBackground,
                                 unfocusedContainerColor = InputBackground,
@@ -269,7 +272,8 @@ fun LoginBody() {
                             },
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(50.dp),
+                                .height(50.dp)
+                                .testTag("login_button"),
                             shape = RoundedCornerShape(20.dp),
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = Color(0xFF009688),
